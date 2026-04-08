@@ -1,0 +1,21 @@
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+
+# Data files
+data/*.csv
+data/*.db
+*.sqlite
+
+# Node / React
+frontend/node_modules/
+frontend/build/
+
+# VS Code
+.vscode/
+
+# Mac
+.DS_Store
