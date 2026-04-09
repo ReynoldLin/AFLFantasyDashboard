@@ -25,6 +25,30 @@ function StatBadge({ label, value }) {
   );
 }
 
+function PositionBadges({ position }) {
+  const parts = position?.split("/") || [];
+  if (parts.length === 1) {
+    return (
+      <span style={{
+        background: getPositionColor(parts[0]),
+        color: "black", borderRadius: 4, padding: "1px 6px", fontSize: 11
+      }}>
+        {parts[0]}
+      </span>
+    );
+  }
+  const color1 = getPositionColor(parts[0]);
+  const color2 = getPositionColor(parts[1]);
+  return (
+    <span style={{
+      background: `linear-gradient(125deg, ${color1} 50%, ${color2} 50%)`,
+      color: "black", borderRadius: 4, padding: "1px 6px", fontSize: 11
+    }}>
+      {parts.join("/")}
+    </span>
+  );
+}
+
 function PlayerCard({ player }) {
   return (
     <div style={{
@@ -37,14 +61,8 @@ function PlayerCard({ player }) {
       </div>
       <div style={{ flex: 1 }}>
         <div style={{ fontWeight: 500, fontSize: 15 }}>{player.full_name}</div>
-        <div style={{ fontSize: 12, marginTop: 2 }}>
-          <span style={{
-            background: getPositionColor(player.position),
-            color: "black", borderRadius: 4, padding: "1px 6px",
-            fontSize: 11, marginRight: 6
-          }}>
-            {player.position}
-          </span>
+        <div style={{ fontSize: 12, marginTop: 2, display: "flex", alignItems: "center", gap: 6 }}>
+          <PositionBadges position={player.position} />
           <span style={{ color: "#888780" }}>${player.cost?.toLocaleString()}</span>
         </div>
       </div>
@@ -86,26 +104,7 @@ export default function App() {
   return (
     <div style={{ maxWidth: 900, margin: "0 auto", padding: "32px 16px", fontFamily: "sans-serif" }}>
       <h1 style={{ fontSize: 24, fontWeight: 500, marginBottom: 4 }}>AFL Fantasy Projector</h1>
-      <p style={{ color: "#888780", marginBottom: 24 }}>2026 season projections based on 2025 data</p>
-
-      {/* Top 10 Chart */}
-      {!loading && top10.length > 0 && (
-        <div style={{ background: "white", borderRadius: 12, padding: 16, border: "1px solid #d3d1c7", marginBottom: 24 }}>
-          <div style={{ fontSize: 14, fontWeight: 500, marginBottom: 12 }}>Top 10 projected players</div>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={top10} layout="vertical" margin={{ left: 80 }}>
-              <XAxis type="number" domain={[60, 120]} tick={{ fontSize: 11 }} />
-              <YAxis type="category" dataKey="full_name" tick={{ fontSize: 11 }} width={80} />
-              <Tooltip formatter={(val) => [`${val} pts`, "Projected avg"]} />
-              <Bar dataKey="projected_avg" radius={[0, 4, 4, 0]}>
-                {top10.map((p, i) => (
-                  <Cell key={i} fill={getPositionColor(p.position)} />
-                ))}
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      )}
+      <p style={{ color: "#888780", marginBottom: 24 }}>2026 Season Projections Based on 2025 Data</p>
 
       {/* Filters */}
       <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
