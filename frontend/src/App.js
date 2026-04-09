@@ -56,9 +56,23 @@ function PlayerCard({ player }) {
       border: "1px solid #d3d1c7", marginBottom: 8,
       display: "flex", alignItems: "center", gap: 16
     }}>
+
       <div style={{ width: 36, textAlign: "center", fontSize: 13, color: "#888780", fontWeight: 500 }}>
         #{player.rank}
       </div>
+      <img
+  src={`/logos/${player.team_id}.svg`}
+  alt=""
+  style={{ width: 42, height: 42, objectFit: "contain" }}
+/>
+      
+      <img
+  src={`https://fantasy.afl.com.au/media/fantasy/players/${player.id}_100.webp?v=3`}
+  alt={player.full_name}
+  style={{ width: 64, height: 64, objectFit: "contain", borderRadius: "50%" }}
+  onError={e => e.target.style.display = 'none'}
+/>
+
       <div style={{ flex: 1 }}>
         <div style={{ fontWeight: 500, fontSize: 15 }}>{player.full_name}</div>
         <div style={{ fontSize: 12, marginTop: 2, display: "flex", alignItems: "center", gap: 6 }}>
@@ -66,6 +80,7 @@ function PlayerCard({ player }) {
           <span style={{ color: "#888780" }}>${player.cost?.toLocaleString()}</span>
         </div>
       </div>
+
       <div style={{ display: "flex", gap: 8 }}>
         <StatBadge label="2025 Avg" value={player.avg_points} />
         <StatBadge label="Career Avg" value={player.career_avg?.toFixed(1)} />
