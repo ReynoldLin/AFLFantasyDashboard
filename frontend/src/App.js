@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 const POSITION_COLORS = {
-  DEF: "#378ADD",
-  MID: "#1D9E75",
-  RUC: "#D85A30",
-  FWD: "#BA7517",
+  DEF: "#F38182",
+  MID: "#EBF19F",
+  RUC: "#A8A8FB",
+  FWD: "#ABF5CA",
 };
 
 function getPositionColor(position) {
@@ -40,7 +40,7 @@ function PlayerCard({ player }) {
         <div style={{ fontSize: 12, marginTop: 2 }}>
           <span style={{
             background: getPositionColor(player.position),
-            color: "white", borderRadius: 4, padding: "1px 6px",
+            color: "black", borderRadius: 4, padding: "1px 6px",
             fontSize: 11, marginRight: 6
           }}>
             {player.position}
