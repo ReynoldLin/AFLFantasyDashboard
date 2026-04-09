@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { TEAM_MAP } from "./constants/teams";
 
 const POSITION_COLORS = {
   DEF: "#F38182",
@@ -49,7 +50,7 @@ function PositionBadges({ position }) {
   );
 }
 
-function PlayerCard({ player }) {
+function PlayerCard({ player, onClick }) {
   return (
     <div style={{
       background: "white", borderRadius: 12, padding: 16,
@@ -69,12 +70,23 @@ function PlayerCard({ player }) {
       <img
   src={`https://fantasy.afl.com.au/media/fantasy/players/${player.id}_100.webp?v=3`}
   alt={player.full_name}
-  style={{ width: 64, height: 64, objectFit: "contain", borderRadius: "50%" }}
+  onClick = {onClick}
+  style={{ width: 64, height: 64, objectFit: "contain", borderRadius: "50%", cursor:"pointer" }}
   onError={e => e.target.style.display = 'none'}
 />
 
       <div style={{ flex: 1 }}>
-        <div style={{ fontWeight: 500, fontSize: 15 }}>{player.full_name}</div>
+        <div
+          onClick={onClick}
+          style={{
+            fontWeight: 500,
+            fontSize: 15,
+            cursor: "pointer",
+            textDecoration: "underline"
+          }}
+        >
+        {player.full_name}
+        </div>
         <div style={{ fontSize: 12, marginTop: 2, display: "flex", alignItems: "center", gap: 6 }}>
           <PositionBadges position={player.position} />
           <span style={{ color: "#888780" }}>${player.cost?.toLocaleString()}</span>
@@ -95,6 +107,7 @@ export default function App() {
   const [search, setSearch] = useState("");
   const [posFilter, setPosFilter] = useState("ALL");
   const [loading, setLoading] = useState(true);
+  const [selectedPlayer, setSelectedPlayer] = useState(null)
 
   useEffect(() => {
     fetch("/projections.json")
@@ -151,8 +164,93 @@ export default function App() {
       ) : filtered.length === 0 ? (
         <div style={{ color: "#888780", textAlign: "center", padding: 40 }}>No players found</div>
       ) : (
-        filtered.map(p => <PlayerCard key={p.id} player={p} />)
+        filtered.map(p => (
+          <PlayerCard
+            key={p.id}
+            player={p}
+            onClick={() => setSelectedPlayer(p)}
+          />
+        ))
       )}
+
+  {/* Modal */}
+     {selectedPlayer && (
+  <div
+    onClick={() => setSelectedPlayer(null)}
+    style={{
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      background: "rgba(0,0,0,0.5)",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      zIndex: 1000
+    }}
+  >
+    <div
+      onClick={(e) => e.stopPropagation()}
+      style={{
+        background: "white",
+        padding: 24,
+        borderRadius: 12,
+        width: "90%",
+        maxWidth: 500
+      }}
+    >
+      <button
+        onClick={() => setSelectedPlayer(null)}
+        style={{
+          float: "right",
+          border: "none",
+          background: "transparent",
+          cursor: "pointer",
+          fontSize: 16
+        }}
+      >
+        ✕
+      </button>
+
+      <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 16 }}>
+
+  {/* Player Headshot */}
+  <img
+    src={`https://fantasy.afl.com.au/media/fantasy/players/${selectedPlayer.id}_100.webp?v=3`}
+    alt={selectedPlayer.full_name}
+    style={{
+      width: 144,
+      height: 144,
+      objectFit: "contain",
+      borderRadius: "50%"
+    }}
+    onError={e => e.target.style.display = 'none'}
+  />
+
+  {/* Name + Position */}
+  <div>
+    <h2 style={{ margin: 0 }}>{selectedPlayer.full_name}</h2>
+    <div style={{ marginTop: 4, fontSize: 14 }}>
+      {TEAM_MAP[selectedPlayer.team_id]}
+    </div>
+    <div style={{ marginTop: 4 }}>
+      <PositionBadges position={selectedPlayer.position} />
+    </div>
+  </div>
+
+</div>
+      <p><strong>Price:</strong> ${selectedPlayer.cost?.toLocaleString()}</p>
+
+      <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+        <StatBadge label="Current Avg" value={selectedPlayer.avg_points} />
+        <StatBadge label="Career Avg" value={selectedPlayer.career_avg?.toFixed(1)} />
+        <StatBadge label="Projected Avg" value={selectedPlayer.projected_avg} />
+      </div>
+    </div>
+  </div>
+)}
+
     </div>
   );
 }

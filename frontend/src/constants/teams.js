@@ -1,0 +1,20 @@
+export const TEAM_MAP = {
+  10: "Adelaide Crows",
+  20: "Brisbane Lions",
+  30: "Carlton",
+  40: "Collingwood",
+  50: "Essendon",
+  60: "Fremantle",
+  70: "Geelong Cats",
+  80: "Hawthorn",
+  90: "Melbourne",
+  100: "North Melbourne",
+  110: "Port Adelaide",
+  120: "Richmond",
+  130: "St Kilda",
+  140: "Western Bulldogs",
+  150: "West Coast Eagles",
+  160: "Sydney Swans",
+  1000: "Gold Coast Suns",
+  1010: "GWS Giants"
+};
