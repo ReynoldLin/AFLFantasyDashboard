@@ -1,0 +1,3 @@
+https://fantasy.afl.com.au/json/fantasy/players.json
+https://fantasy.afl.com.au/json/fantasy/rounds.json
+https://fantasy.afl.com.au/json/fantasy/players_game_stats/2026.json

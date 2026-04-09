@@ -82,9 +82,9 @@ function PlayerCard({ player }) {
       </div>
 
       <div style={{ display: "flex", gap: 8 }}>
-        <StatBadge label="2026 Avg" value={player.avg_points} />
+        <StatBadge label="Current 2026 Avg" value={player.avg_points} />
         <StatBadge label="Career Avg" value={player.career_avg?.toFixed(1)} />
-        <StatBadge label="Projected" value={player.projected_avg} />
+        <StatBadge label="Projected 2026 Avg" value={player.projected_avg} />
       </div>
     </div>
   );
@@ -119,7 +119,7 @@ export default function App() {
   return (
     <div style={{ maxWidth: 900, margin: "0 auto", padding: "32px 16px", fontFamily: "'Open Sans', sans-serif" }}>
       <h1 style={{ fontSize: 24, fontWeight: 500, marginBottom: 4 }}>AFL Fantasy Projector</h1>
-      <p style={{ color: "#888780", marginBottom: 24 }}>2026 Season Projections Based on 2025 Data</p>
+      <p style={{ color: "#888780", marginBottom: 24 }}>2026 Season AFL Fantasy Projections</p>
 
       {/* Filters */}
       <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>

@@ -10,7 +10,16 @@ def fetch_players():
     response.raise_for_status()
     return response.json()
 
-def parse_players(raw):
+def fetch_career_avgs():
+    """Fetch career averages from another API."""
+    try:
+        r = requests.get("https://fantasy.afl.com.au/data/afl/players.json", timeout=10)
+        data = r.json()
+        return {p["id"]: p.get("stats", {}).get("career_avg") for p in data}
+    except:
+        return {}
+
+def parse_players(raw, career_avgs={}):
     row = []
     for p in raw:
         scores = p.get("scores", {})
@@ -32,6 +41,7 @@ def parse_players(raw):
             "status": p.get("status"),
             "dob": p.get("dob"),
             "avg_points": p.get("averagePoints"),
+            "career_avg": career_avgs.get(p["id"]),
             "total_points": p.get("totalPoints"),
             "games_played": p.get("gamesPlayed"),
             "high_score": p.get("highScore"),
@@ -53,9 +63,9 @@ if __name__ == "__main__":
     print("Fetching players...")
     raw = fetch_players()
     print(f"Found {len(raw)} players")
-    df = parse_players(raw)
-    save_players(df)
 
-    top = df[df["games_played"] > 0].sort_values("avg_points", ascending=False).head(10)
-    print("\nTop 10 players by 2026 average:")
-    print(top[["full_name", "position", "avg_points", "last_3_avg", "cost"]].to_string(index=False))
+    print("Fetching career averages...")
+    career_avgs = fetch_career_avgs()
+
+    df = parse_players(raw, career_avgs=career_avgs)
+    save_players(df)

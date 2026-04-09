@@ -3,8 +3,6 @@ import requests
 import json
 from datetime import date
 
-PLAYERS_URL = "https://fantasy.afl.com.au/data/afl/players.json"
-
 def calculate_age(dob_str):
     try:
         dob = date.fromisoformat(dob_str)
@@ -52,24 +50,18 @@ def project_player(row):
     avg_points = row.get("avg_points") or 0
     last_3_avg = row.get("last_3_avg") or 0
     last_5_avg = row.get("last_5_avg") or 0
+    career_avg = row.get("career_avg") or 0
     games_played = row.get("games_played") or 0
 
-    if avg_points == 0:
+    # Need at least some data to project
+    if avg_points == 0 and career_avg == 0:
         return None
 
-    # Weight recent form more heavily if enough games played
-    if games_played >= 10:
-        # Enough data — weight last 3 heavily
-        base = (avg_points * 0.4) + (last_3_avg * 0.4) + (last_5_avg * 0.2)
-    elif games_played >= 5:
-        # Some data — balance season avg and recent
-        base = (avg_points * 0.5) + (last_3_avg * 0.3) + (last_5_avg * 0.2)
-    else:
-        # Very few games — rely mostly on season avg
-        base = avg_points
-
+    base = (avg_points * 0.25) + (last_3_avg * 0.20) + (last_5_avg * 0.15) + (career_avg * 0.40)
+   
     age = row.get("age")
-    adj = base * age_factor(age) * reliability_factor(games_played)
+    # adj = base * age_factor(age) * reliability_factor(games_played)
+    adj = base * age_factor(age)
 
     return round(adj, 1)
 
