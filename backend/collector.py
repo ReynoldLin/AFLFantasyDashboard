@@ -3,14 +3,7 @@ import pandas as pd
 import json
 import os
 
-URL = "https://fantasy.afl.com.au/data/afl/players.json"
-
-POSITION_MAP = {
-    1: "DEF",
-    2: "MID",
-    3: "RUC",
-    4: "FWD"
-}
+URL = "https://fantasy.afl.com.au/json/fantasy/players.json"
 
 def fetch_players():
     response = requests.get(URL)
@@ -20,37 +13,35 @@ def fetch_players():
 def parse_players(raw):
     row = []
     for p in raw:
-        stats = p.get("stats", {})
-        scores = stats.get("scores", {})
+        scores = p.get("scores", {})
 
-        #Get last 3 and 5 round scores
         sorted_rounds = sorted(scores.keys(), key=lambda x: int(x), reverse=True)
         recent_scores = [scores[r] for r in sorted_rounds[:5]]
 
-        positions = [POSITION_MAP.get(pos, "UNK") for pos in p.get("positions", [])]
+        positions = p.get("position", [])
+        position = "/".join(positions) if positions else "UNK"
 
         row.append({
             "id": p["id"],
-            "first_name": p["first_name"],
-            "last_name": p["last_name"],
-            "full_name": f"{p['first_name']} {p['last_name']}",
-            "team_id": p.get("squad_id"),
-            "position": "/".join(positions),
-            "cost": p.get("cost"),
+            "first_name": p["firstName"],
+            "last_name": p["lastName"],
+            "full_name": f"{p['firstName']} {p['lastName']}",
+            "team_id": p.get("squadId"),
+            "position": position,
+            "cost": p.get("price"),
             "status": p.get("status"),
-            "avg_points": stats.get("avg_points"),
-            "total_points": stats.get("total_points"),
-            "games_played": stats.get("games_played"),
-            "high_score": stats.get("high_score"),
-            "low_score": stats.get("low_score"),
-            "last_3_avg": stats.get("last_3_avg"),
-            "last_5_avg": stats.get("last_5_avg"),
-            "career_avg": stats.get("career_avg"),
-            "proj_avg": stats.get("proj_avg"),
-            "owned_by": stats.get("owned_by"),
+            "dob": p.get("dob"),
+            "avg_points": p.get("averagePoints"),
+            "total_points": p.get("totalPoints"),
+            "games_played": p.get("gamesPlayed"),
+            "high_score": p.get("highScore"),
+            "low_score": p.get("lowScore"),
+            "last_3_avg": p.get("last3Avg"),
+            "last_5_avg": p.get("last5Avg"),
+            "last_round_score": p.get("lastRoundScore"),
             "recent_scores": json.dumps(recent_scores),
         })
-        
+
     return pd.DataFrame(row)
 
 def save_players(df):
@@ -61,10 +52,10 @@ def save_players(df):
 if __name__ == "__main__":
     print("Fetching players...")
     raw = fetch_players()
+    print(f"Found {len(raw)} players")
     df = parse_players(raw)
     save_players(df)
 
-    # Preview top 10 by average
-    top = df[df["games_played"] > 5].sort_values("avg_points", ascending=False).head(10)
-    print("\nTop 10 players by average:")
+    top = df[df["games_played"] > 0].sort_values("avg_points", ascending=False).head(10)
+    print("\nTop 10 players by 2026 average:")
     print(top[["full_name", "position", "avg_points", "last_3_avg", "cost"]].to_string(index=False))

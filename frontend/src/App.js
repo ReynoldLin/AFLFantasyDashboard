@@ -82,7 +82,7 @@ function PlayerCard({ player }) {
       </div>
 
       <div style={{ display: "flex", gap: 8 }}>
-        <StatBadge label="2025 Avg" value={player.avg_points} />
+        <StatBadge label="2026 Avg" value={player.avg_points} />
         <StatBadge label="Career Avg" value={player.career_avg?.toFixed(1)} />
         <StatBadge label="Projected" value={player.projected_avg} />
       </div>
