@@ -221,7 +221,7 @@ function CareerHistoryTable({ history, roundsPerSeason }) {
                               <span style={{
                                 background: avgColour(game.score),
                                 color: "black", borderRadius: 4,
-                                padding: "1px 6px", fontWeight: 700, fontSize: 12,
+                                padding: "1px 6px", fontWeight: 500,
                                 display: "inline-block", minWidth: 40, textAlign: "center"
                               }}>
                                 {game.score}
