@@ -172,7 +172,7 @@ function CareerHistoryTable({ history, roundsPerSeason }) {
                   <span style={{
                     background: gamesColour(season.games_played, season.year, roundsPerSeason),
                     color: "black", borderRadius: 6, padding: "2px 0",
-                    fontWeight: 700, fontSize: 12,
+                    fontWeight: 500, fontSize: 12,
                     display: "inline-block", minWidth: 32, textAlign: "center"
                   }}>
                     {season.games_played}
@@ -184,7 +184,7 @@ function CareerHistoryTable({ history, roundsPerSeason }) {
                       <span style={{
                         background: avgColour(season.avg),
                         color: "black", borderRadius: 6, padding: "2px 0",
-                        fontWeight: 700, fontSize: 12,
+                        fontWeight: 500, fontSize: 12,
                         display: "inline-block", minWidth: 48, textAlign: "center"
                       }}>
                         {season.avg}
