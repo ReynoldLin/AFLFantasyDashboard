@@ -18,3 +18,24 @@ export const TEAM_MAP = {
   1000: "Gold Coast Suns",
   1010: "GWS Giants"
 };
+
+export const TEAM_INIT_MAP = {
+  10: "ADE",
+  20: "BRI",
+  30: "CAR",
+  40: "COL",
+  50: "ESS",
+  60: "FRE",
+  70: "GEE",
+  80: "HAW",
+  90: "MEL",
+  100: "NM",
+  110: "PA",
+  120: "RIC",
+  130: "STK",
+  140: "WB",
+  150: "WCE",
+  160: "SYD",
+  1000: "GCS",
+  1010: "GWS"
+};

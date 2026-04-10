@@ -69,7 +69,7 @@ function PlayerCard({ player, onClick }) {
         src={`https://fantasy.afl.com.au/media/fantasy/players/${player.id}_100.webp?v=3`}
         alt={player.full_name}
         onClick={onClick}
-        style={{ width: 64, height: 64, objectFit: "contain", borderRadius: "50%", cursor: "pointer" }}
+        style={{ width: 64, height: 64, objectFit: "contain", borderRadius: "0%", cursor: "pointer" }}
         onError={e => e.target.style.display = 'none'}
       />
       <div style={{ flex: 1 }}>
@@ -93,6 +93,12 @@ function PlayerCard({ player, onClick }) {
   );
 }
 
+function avgColor(avg) {
+  if (avg >= 100) return "#C8E0A9";
+  if (avg >= 70) return "#FEE08D";
+  return "#ED999B";
+}
+
 function CareerHistoryTable({ playerId, history }) {
   if (!history || history.length === 0) {
     return <p style={{ color: "#888780", fontSize: 13 }}>No career history available.</p>;
@@ -103,6 +109,7 @@ function CareerHistoryTable({ playerId, history }) {
       <thead>
         <tr style={{ borderBottom: "2px solid #d3d1c7" }}>
           <th style={{ textAlign: "left", padding: "6px 8px", color: "#5f5e5a", fontWeight: 500 }}>Year</th>
+          {/* <th style={{ textAlign: "center", padding: "6px 8px", color: "#5f5e5a", fontWeight: 500 }}>Team</th> */}
           <th style={{ textAlign: "center", padding: "6px 8px", color: "#5f5e5a", fontWeight: 500 }}>Games</th>
           <th style={{ textAlign: "center", padding: "6px 8px", color: "#5f5e5a", fontWeight: 500 }}>Avg</th>
           <th style={{ textAlign: "center", padding: "6px 8px", color: "#5f5e5a", fontWeight: 500 }}>High</th>
@@ -119,21 +126,26 @@ function CareerHistoryTable({ playerId, history }) {
               borderBottom: "1px solid #f1efe8"
             }}
           >
-            <td style={{ padding: "8px 8px", fontWeight: season.year === 2026 ? 600 : 400 }}>
+            <td style={{ padding: "8px 8px", fontWeight: season.year === 2026 ? 700 : 400 }}>
               {season.year}
-              {season.year === 2026 && (
-                <span style={{
-                  marginLeft: 6, fontSize: 10, background: "#1D9E75",
-                  color: "white", borderRadius: 4, padding: "1px 5px"
-                }}>
-                  LIVE
-                </span>
-              )}
             </td>
             <td style={{ textAlign: "center", padding: "8px 8px" }}>{season.games_played}</td>
-            <td style={{ textAlign: "center", padding: "8px 8px", fontWeight: 500 }}>{season.avg}</td>
-            <td style={{ textAlign: "center", padding: "8px 8px", color: "#1D9E75" }}>{season.high}</td>
-            <td style={{ textAlign: "center", padding: "8px 8px", color: "#D85A30" }}>{season.low}</td>
+            <td style={{ textAlign: "center", padding: "8px 8px" }}>
+              <span style={{
+                background: avgColor(season.avg),
+                color: "black",
+                borderRadius: 6,
+                padding: "2px 10px",
+                minWidth: 30,
+                display: "inline-block",
+                fontWeight: 500,
+                fontSize: 12
+              }}>
+                {season.avg}
+              </span>
+            </td>
+            <td style={{ textAlign: "center", padding: "8px 8px", color: "#888780" }}>{season.high}</td>
+            <td style={{ textAlign: "center", padding: "8px 8px", color: "#888780" }}>{season.low}</td>
             <td style={{ textAlign: "center", padding: "8px 8px", color: "#888780" }}>{season.total}</td>
           </tr>
         ))}
@@ -249,7 +261,7 @@ export default function App() {
               <img
                 src={`https://fantasy.afl.com.au/media/fantasy/players/${selectedPlayer.id}_100.webp?v=3`}
                 alt={selectedPlayer.full_name}
-                style={{ width: 80, height: 80, objectFit: "contain", borderRadius: "50%" }}
+                style={{ width: 100, height: 100, objectFit: "contain", borderRadius: "0%" }}
                 onError={e => e.target.style.display = 'none'}
               />
               <div>
@@ -264,7 +276,7 @@ export default function App() {
               <img
                 src={`/logos/${selectedPlayer.team_id}.svg`}
                 alt=""
-                style={{ width: 48, height: 48, objectFit: "contain", marginLeft: "auto" }}
+                style={{ width: 64, height: 64, objectFit: "contain", marginLeft: "auto" }}
               />
             </div>
 
