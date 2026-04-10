@@ -203,7 +203,7 @@ function CareerHistoryTable({ history, roundsPerSeason }) {
                     <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
                       <thead>
                         <tr style={{ borderBottom: "1px solid #d3d1c7", background: "#f1efe8" }}>
-                          {["Rd", "Score", "TOG%", "D", "K", "H", "M", "T", "G", "B", "HO", "FF", "FA"].map(h => (
+                          {["Rd", "Opp", "Score", "TOG%", "D", "K", "H", "M", "T", "G", "B", "HO", "FF", "FA"].map(h => (
                             <th key={h} style={{ padding: "5px 8px", textAlign: "center", fontWeight: 500, color: "#5f5e5a" }}>
                               {h}
                             </th>
@@ -217,6 +217,13 @@ function CareerHistoryTable({ history, roundsPerSeason }) {
                             background: gi % 2 === 0 ? "white" : "#fafaf8"
                           }}>
                             <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.round}</td>
+                            <td style={{ textAlign: "center", padding: "5px 4px" }}>
+                              <img
+                                src={`/logos/${game.opponent_id}.svg`}
+                                alt=""
+                                style={{ width: 24, height: 24, objectFit: "contain" }}
+                              />
+                            </td>
                             <td style={{ textAlign: "center", padding: "5px 8px" }}>
                               <span style={{
                                 background: avgColour(game.score),

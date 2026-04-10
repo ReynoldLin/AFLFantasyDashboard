@@ -96,18 +96,17 @@ def build_player_history(player, min_year=2014):
 if __name__ == "__main__":
     print("Fetching player list...")
     players = requests.get(PLAYERS_URL).json()
-    active = [p for p in players if p.get("status") != "not-playing"]
-    print(f"Building history for {len(active)} active players...")
+    print(f"Building history for {len(players)} players...")
 
     all_history = {}
-    for i, p in enumerate(active):
+    for i, p in enumerate(players):
         player_id = p["id"]
         history = build_player_history(p)
         if history:
             all_history[str(player_id)] = history
 
         if (i + 1) % 25 == 0:
-            print(f"  {i + 1}/{len(active)} done...")
+            print(f"  {i + 1}/{len(players)} done...")
 
     os.makedirs("data", exist_ok=True)
     with open("data/player_history.json", "w") as f:
