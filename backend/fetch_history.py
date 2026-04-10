@@ -42,6 +42,10 @@ def build_player_history(player, min_year=2014):
         if not games:
             continue
 
+        def season_avg(key):
+            vals = [g.get(key, 0) for g in games]
+            return round(sum(vals) / len(vals), 1) if vals else 0
+
         scores = [calculate_fantasy_score(g) for g in games]
         games_played = len(scores)
         avg = round(sum(scores) / games_played, 1) if games_played > 0 else 0
@@ -54,6 +58,16 @@ def build_player_history(player, min_year=2014):
             "low": min(scores),
             "total": sum(scores),
             "scores": scores,
+            "disposals": season_avg("disposals"),
+            "kicks": season_avg("kicks"),
+            "handballs": season_avg("handballs"),
+            "marks": season_avg("marks"),
+            "tackles": season_avg("tackles"),
+            "goals": season_avg("goals"),
+            "behinds": season_avg("behinds"),
+            "hitouts": season_avg("hitouts"),
+            "frees_for": season_avg("freesFor"),
+            "frees_against": season_avg("freesAgainst"),
         })
 
         time.sleep(0.05)

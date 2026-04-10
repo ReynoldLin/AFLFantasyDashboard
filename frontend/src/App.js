@@ -99,58 +99,93 @@ function avgColor(avg) {
   return "#ED999B";
 }
 
-function CareerHistoryTable({ playerId, history }) {
+function gamesColor(games) {
+  if (games >= 20) return "#C8E0A9";
+  if (games >= 14) return "#FEE08D";
+  return "#ED999B";
+}
+
+function CareerHistoryTable({ history }) {
   if (!history || history.length === 0) {
     return <p style={{ color: "#888780", fontSize: 13 }}>No career history available.</p>;
   }
 
+  const cols = [
+    { key: "avg", label: "Avg" },
+    { key: "disposals", label: "D" },
+    { key: "kicks", label: "K" },
+    { key: "handballs", label: "H" },
+    { key: "marks", label: "M" },
+    { key: "tackles", label: "T" },
+    { key: "goals", label: "G" },
+    { key: "behinds", label: "B" },
+    { key: "hitouts", label: "HO" },
+    { key: "frees_for", label: "FF" },
+    { key: "frees_against", label: "FA" },
+  ];
+
   return (
-    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, marginTop: 8 }}>
-      <thead>
-        <tr style={{ borderBottom: "2px solid #d3d1c7" }}>
-          <th style={{ textAlign: "left", padding: "6px 8px", color: "#5f5e5a", fontWeight: 500 }}>Year</th>
-          {/* <th style={{ textAlign: "center", padding: "6px 8px", color: "#5f5e5a", fontWeight: 500 }}>Team</th> */}
-          <th style={{ textAlign: "center", padding: "6px 8px", color: "#5f5e5a", fontWeight: 500 }}>Games</th>
-          <th style={{ textAlign: "center", padding: "6px 8px", color: "#5f5e5a", fontWeight: 500 }}>Avg</th>
-          <th style={{ textAlign: "center", padding: "6px 8px", color: "#5f5e5a", fontWeight: 500 }}>High</th>
-          <th style={{ textAlign: "center", padding: "6px 8px", color: "#5f5e5a", fontWeight: 500 }}>Low</th>
-          <th style={{ textAlign: "center", padding: "6px 8px", color: "#5f5e5a", fontWeight: 500 }}>Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        {[...history].reverse().map((season, i) => (
-          <tr
-            key={season.year}
-            style={{
+    <div style={{ overflowX: "auto" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+        <thead>
+          <tr style={{ borderBottom: "2px solid #d3d1c7" }}>
+            <th style={{ textAlign: "left", padding: "6px 8px", color: "#5f5e5a", fontWeight: 500 }}>Year</th>
+            <th style={{ textAlign: "center", padding: "6px 8px", color: "#5f5e5a", fontWeight: 500 }}>GM</th>
+            {cols.map(c => (
+              <th key={c.key} style={{ textAlign: "center", padding: "6px 8px", color: "#5f5e5a", fontWeight: 500 }}>
+                {c.label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {[...history].reverse().map((season, i) => (
+            <tr key={season.year} style={{
               background: i % 2 === 0 ? "#fafaf8" : "white",
               borderBottom: "1px solid #f1efe8"
-            }}
-          >
-            <td style={{ padding: "8px 8px", fontWeight: season.year === 2026 ? 700 : 400 }}>
-              {season.year}
-            </td>
-            <td style={{ textAlign: "center", padding: "8px 8px" }}>{season.games_played}</td>
-            <td style={{ textAlign: "center", padding: "8px 8px" }}>
-              <span style={{
-                background: avgColor(season.avg),
-                color: "black",
-                borderRadius: 6,
-                padding: "2px 10px",
-                minWidth: 30,
-                display: "inline-block",
-                fontWeight: 500,
-                fontSize: 12
-              }}>
-                {season.avg}
-              </span>
-            </td>
-            <td style={{ textAlign: "center", padding: "8px 8px", color: "#888780" }}>{season.high}</td>
-            <td style={{ textAlign: "center", padding: "8px 8px", color: "#888780" }}>{season.low}</td>
-            <td style={{ textAlign: "center", padding: "8px 8px", color: "#888780" }}>{season.total}</td>
-          </tr>
-        ))}
-      </tbody>
-    </table>
+            }}>
+              <td style={{ padding: "8px 8px", fontWeight: season.year === 2026 ? 700 : 400 }}>{season.year}</td>
+              <td style={{ textAlign: "center", padding: "8px 8px" }}>
+                <span style={{
+                  background: gamesColor(season.games_played),
+                  color: "black",
+                  borderRadius: 6,
+                  padding: "2px 0",
+                  fontWeight: 500,
+                  fontSize: 12,
+                  display: "inline-block",
+                  minWidth: 32,
+                  textAlign: "center"
+                }}>
+                  {season.games_played}
+                </span>
+              </td>
+              {cols.map(c => (
+                <td key={c.key} style={{ textAlign: "center", padding: "8px 4px" }}>
+                  {c.key === "avg" ? (
+                    <span style={{
+                      background: avgColor(season.avg),
+                      color: "black",
+                      borderRadius: 6,
+                      padding: "2px 0",
+                      fontWeight: 500,
+                      fontSize: 12,
+                      display: "inline-block",
+                      minWidth: 48,
+                      textAlign: "center"
+                    }}>
+                      {season.avg}
+                    </span>
+                  ) : (
+                    season[c.key] ?? "—"
+                  )}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
