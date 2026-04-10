@@ -68,6 +68,25 @@ def build_player_history(player, min_year=2014):
             "hitouts": season_avg("hitouts"),
             "frees_for": season_avg("freesFor"),
             "frees_against": season_avg("freesAgainst"),
+            "games": [
+                {
+                    "round": g.get("roundNumber"),
+                    "score": calculate_fantasy_score(g),
+                    "kicks": g.get("kicks"),
+                    "handballs": g.get("handballs"),
+                    "disposals": g.get("disposals"),
+                    "marks": g.get("marks"),
+                    "tackles": g.get("tackles"),
+                    "goals": g.get("goals"),
+                    "behinds": g.get("behinds"),
+                    "hitouts": g.get("hitouts"),
+                    "frees_for": g.get("freesFor"),
+                    "frees_against": g.get("freesAgainst"),
+                    "opponent_id": g.get("opponentSquadId"),
+                    "time_on_ground": g.get("timeOnGround"),
+                }
+                for g in games
+            ]
         })
 
         time.sleep(0.05)

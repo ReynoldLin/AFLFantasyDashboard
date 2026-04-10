@@ -2,16 +2,34 @@ import { useState, useEffect } from "react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 import { TEAM_MAP } from "./constants/teams";
 
-const POSITION_COLORS = {
+const POSITION_COLOURS = {
   DEF: "#F38182",
   MID: "#EBF19F",
   RUC: "#A8A8FB",
   FWD: "#ABF5CA",
 };
 
-function getPositionColor(position) {
+function avgColour(avg) {
+  if (avg >= 100) return "#C8E0A9";
+  if (avg >= 70) return "#FEE08D";
+  return "#ED999B";
+}
+
+function gamesColour(games) {
+  if (games >= 20) return "#C8E0A9";
+  if (games >= 14) return "#FEE08D";
+  return "#ED999B";
+}
+
+function togColour(tog) {
+  if (tog >= 80) return "#C8E0A9";
+  if (tog >= 60) return "#FEE08D";
+  return "#ED999B";
+}
+
+function getPositionColour(position) {
   const primary = position?.split("/")[0];
-  return POSITION_COLORS[primary] || "#888780";
+  return POSITION_COLOURS[primary] || "#888780";
 }
 
 function StatBadge({ label, value }) {
@@ -21,7 +39,7 @@ function StatBadge({ label, value }) {
       background: "#f1efe8", borderRadius: 8, minWidth: 80
     }}>
       <div style={{ fontSize: 11, color: "#5f5e5a", marginBottom: 2 }}>{label}</div>
-      <div style={{ fontSize: 16, fontWeight: 500 }}>{value ?? "—"}</div>
+      <div style={{ fontSize: 16, fontWeight: 700 }}>{value ?? "—"}</div>
     </div>
   );
 }
@@ -31,15 +49,15 @@ function PositionBadges({ position }) {
   if (parts.length === 1) {
     return (
       <span style={{
-        background: getPositionColor(parts[0]),
+        background: getPositionColour(parts[0]),
         color: "black", borderRadius: 4, padding: "1px 6px", fontSize: 11
       }}>
         {parts[0]}
       </span>
     );
   }
-  const color1 = getPositionColor(parts[0]);
-  const color2 = getPositionColor(parts[1]);
+  const color1 = getPositionColour(parts[0]);
+  const color2 = getPositionColour(parts[1]);
   return (
     <span style={{
       background: `linear-gradient(125deg, ${color1} 50%, ${color2} 50%)`,
@@ -93,19 +111,9 @@ function PlayerCard({ player, onClick }) {
   );
 }
 
-function avgColor(avg) {
-  if (avg >= 100) return "#C8E0A9";
-  if (avg >= 70) return "#FEE08D";
-  return "#ED999B";
-}
+function CareerHistoryTable({ history, roundsPerSeason }) {
+  const [expandedYears, setExpandedYears] = useState(new Set());
 
-function gamesColor(games) {
-  if (games >= 20) return "#C8E0A9";
-  if (games >= 14) return "#FEE08D";
-  return "#ED999B";
-}
-
-function CareerHistoryTable({ history }) {
   if (!history || history.length === 0) {
     return <p style={{ color: "#888780", fontSize: 13 }}>No career history available.</p>;
   }
@@ -126,13 +134,13 @@ function CareerHistoryTable({ history }) {
 
   return (
     <div style={{ overflowX: "auto" }}>
-      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12, background: "#DEEDFA", borderRadius: 6 }}>
         <thead>
           <tr style={{ borderBottom: "2px solid #d3d1c7" }}>
-            <th style={{ textAlign: "left", padding: "6px 8px", color: "#5f5e5a", fontWeight: 500 }}>Year</th>
-            <th style={{ textAlign: "center", padding: "6px 8px", color: "#5f5e5a", fontWeight: 500 }}>GM</th>
+            <th style={{ textAlign: "left", padding: "6px 8px", color: "black", fontWeight: 500 }}>Year</th>
+            <th style={{ textAlign: "center", padding: "6px 8px", color: "black", fontWeight: 500 }}>GM</th>
             {cols.map(c => (
-              <th key={c.key} style={{ textAlign: "center", padding: "6px 8px", color: "#5f5e5a", fontWeight: 500 }}>
+              <th key={c.key} style={{ textAlign: "center", padding: "6px 8px", color: "black", fontWeight: 500 }}>
                 {c.label}
               </th>
             ))}
@@ -140,48 +148,112 @@ function CareerHistoryTable({ history }) {
         </thead>
         <tbody>
           {[...history].reverse().map((season, i) => (
-            <tr key={season.year} style={{
-              background: i % 2 === 0 ? "#fafaf8" : "white",
-              borderBottom: "1px solid #f1efe8"
-            }}>
-              <td style={{ padding: "8px 8px", fontWeight: season.year === 2026 ? 700 : 400 }}>{season.year}</td>
-              <td style={{ textAlign: "center", padding: "8px 8px" }}>
-                <span style={{
-                  background: gamesColor(season.games_played),
-                  color: "black",
-                  borderRadius: 6,
-                  padding: "2px 0",
-                  fontWeight: 500,
-                  fontSize: 12,
-                  display: "inline-block",
-                  minWidth: 32,
-                  textAlign: "center"
-                }}>
-                  {season.games_played}
-                </span>
-              </td>
-              {cols.map(c => (
-                <td key={c.key} style={{ textAlign: "center", padding: "8px 4px" }}>
-                  {c.key === "avg" ? (
-                    <span style={{
-                      background: avgColor(season.avg),
-                      color: "black",
-                      borderRadius: 6,
-                      padding: "2px 0",
-                      fontWeight: 500,
-                      fontSize: 12,
-                      display: "inline-block",
-                      minWidth: 48,
-                      textAlign: "center"
-                    }}>
-                      {season.avg}
-                    </span>
-                  ) : (
-                    season[c.key] ?? "—"
-                  )}
+            <>
+              <tr
+                key={season.year}
+                style={{
+                  background: expandedYears.has(season.year) ? "#f1efe8" : i % 2 === 0 ? "#fafaf8" : "white",
+                  borderBottom: "1px solid #f1efe8",
+                  cursor: "pointer"
+                }}
+                onClick={() => setExpandedYears(prev => {
+                  const next = new Set(prev);
+                  next.has(season.year) ? next.delete(season.year) : next.add(season.year);
+                  return next;
+                })}
+              >
+                <td style={{ padding: "8px 8px", fontWeight: season.year === 2026 ? 700 : 400}}>
+                  {season.year}
+                  <span style={{ marginLeft: 6, fontSize: 10, color: "#888780" }}>
+                    {expandedYears.has(season.year) ? "▲" : "▼"}
+                  </span>
                 </td>
-              ))}
-            </tr>
+                <td style={{ textAlign: "center", padding: "8px 8px" }}>
+                  <span style={{
+                    background: gamesColour(season.games_played, season.year, roundsPerSeason),
+                    color: "black", borderRadius: 6, padding: "2px 0",
+                    fontWeight: 700, fontSize: 12,
+                    display: "inline-block", minWidth: 32, textAlign: "center"
+                  }}>
+                    {season.games_played}
+                  </span>
+                </td>
+                {cols.map(c => (
+                  <td key={c.key} style={{ textAlign: "center", padding: "8px 4px" }}>
+                    {c.key === "avg" ? (
+                      <span style={{
+                        background: avgColour(season.avg),
+                        color: "black", borderRadius: 6, padding: "2px 0",
+                        fontWeight: 700, fontSize: 12,
+                        display: "inline-block", minWidth: 48, textAlign: "center"
+                      }}>
+                        {season.avg}
+                      </span>
+                    ) : (
+                      season[c.key] ?? "—"
+                    )}
+                  </td>
+                ))}
+              </tr>
+
+              {/* Expanded game rows */}
+              {expandedYears.has(season.year) && (
+                <tr>
+                  <td colSpan={cols.length + 2} style={{ padding: 0, background: "#f8f8f6" }}>
+                    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 11 }}>
+                      <thead>
+                        <tr style={{ borderBottom: "1px solid #d3d1c7", background: "#f1efe8" }}>
+                          {["Rd", "Score", "TOG%", "D", "K", "H", "M", "T", "G", "B", "HO", "FF", "FA"].map(h => (
+                            <th key={h} style={{ padding: "5px 8px", textAlign: "center", fontWeight: 500, color: "#5f5e5a" }}>
+                              {h}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {season.games?.map((game, gi) => (
+                          <tr key={gi} style={{
+                            borderBottom: "1px solid #f1efe8",
+                            background: gi % 2 === 0 ? "white" : "#fafaf8"
+                          }}>
+                            <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.round}</td>
+                            <td style={{ textAlign: "center", padding: "5px 8px" }}>
+                              <span style={{
+                                background: avgColour(game.score),
+                                color: "black", borderRadius: 4,
+                                padding: "1px 6px", fontWeight: 700, fontSize: 12,
+                                display: "inline-block", minWidth: 40, textAlign: "center"
+                              }}>
+                                {game.score}
+                              </span>
+                            </td>
+                            <td style={{ textAlign: "center", padding: "5px 8px" }}>
+                              <span style={{
+                                background: togColour(game.time_on_ground),
+                                color: "black", borderRadius: 6, padding: "2px 0px",
+                                display: "inline-block", minWidth: 42, textAlign: "center"
+                              }}>
+                                {game.time_on_ground}%
+                              </span>
+                            </td>
+                            <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.disposals}</td>
+                            <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.kicks}</td>
+                            <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.handballs}</td>
+                            <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.marks}</td>
+                            <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.tackles}</td>
+                            <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.goals}</td>
+                            <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.behinds}</td>
+                            <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.hitouts}</td>
+                            <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.frees_for}</td>
+                            <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.frees_against}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              )}
+            </>
           ))}
         </tbody>
       </table>
@@ -210,6 +282,7 @@ export default function App() {
       .then(res => res.json())
       .then(data => setHistory(data))
       .catch(() => {});
+
   }, []);
 
   const positions = ["ALL", "DEF", "MID", "RUC", "FWD"];
@@ -222,8 +295,8 @@ export default function App() {
 
   return (
     <div style={{ maxWidth: 900, margin: "0 auto", padding: "32px 16px", fontFamily: "'Open Sans', sans-serif" }}>
-      <h1 style={{ fontSize: 24, fontWeight: 500, marginBottom: 4 }}>AFL Fantasy Projector</h1>
-      <p style={{ color: "#888780", marginBottom: 24 }}>2026 Season AFL Fantasy Projections</p>
+      <h1 style={{ fontSize: 24, fontWeight: 500, marginBottom: 4 }}>AFL Fantasy Dashboard</h1>
+      <p style={{ color: "#888780", marginBottom: 24 }}>2026 Season AFL Fantasy Dashboard</p>
 
       {/* Filters */}
       <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
