@@ -57,42 +57,33 @@ function PlayerCard({ player, onClick }) {
       border: "1px solid #d3d1c7", marginBottom: 8,
       display: "flex", alignItems: "center", gap: 16
     }}>
-
       <div style={{ width: 36, textAlign: "center", fontSize: 13, color: "#888780", fontWeight: 500 }}>
         #{player.rank}
       </div>
       <img
-  src={`/logos/${player.team_id}.svg`}
-  alt=""
-  style={{ width: 42, height: 42, objectFit: "contain" }}
-/>
-      
+        src={`/logos/${player.team_id}.svg`}
+        alt=""
+        style={{ width: 42, height: 42, objectFit: "contain" }}
+      />
       <img
-  src={`https://fantasy.afl.com.au/media/fantasy/players/${player.id}_100.webp?v=3`}
-  alt={player.full_name}
-  onClick = {onClick}
-  style={{ width: 64, height: 64, objectFit: "contain", borderRadius: "50%", cursor:"pointer" }}
-  onError={e => e.target.style.display = 'none'}
-/>
-
+        src={`https://fantasy.afl.com.au/media/fantasy/players/${player.id}_100.webp?v=3`}
+        alt={player.full_name}
+        onClick={onClick}
+        style={{ width: 64, height: 64, objectFit: "contain", borderRadius: "50%", cursor: "pointer" }}
+        onError={e => e.target.style.display = 'none'}
+      />
       <div style={{ flex: 1 }}>
         <div
           onClick={onClick}
-          style={{
-            fontWeight: 500,
-            fontSize: 15,
-            cursor: "pointer",
-            textDecoration: "underline"
-          }}
+          style={{ fontWeight: 500, fontSize: 15, cursor: "pointer", textDecoration: "underline" }}
         >
-        {player.full_name}
+          {player.full_name}
         </div>
         <div style={{ fontSize: 12, marginTop: 2, display: "flex", alignItems: "center", gap: 6 }}>
           <PositionBadges position={player.position} />
           <span style={{ color: "#888780" }}>${player.cost?.toLocaleString()}</span>
         </div>
       </div>
-
       <div style={{ display: "flex", gap: 8 }}>
         <StatBadge label="Current 2026 Avg" value={player.avg_points} />
         <StatBadge label="Career Avg" value={player.career_avg?.toFixed(1)} />
@@ -102,12 +93,62 @@ function PlayerCard({ player, onClick }) {
   );
 }
 
+function CareerHistoryTable({ playerId, history }) {
+  if (!history || history.length === 0) {
+    return <p style={{ color: "#888780", fontSize: 13 }}>No career history available.</p>;
+  }
+
+  return (
+    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13, marginTop: 8 }}>
+      <thead>
+        <tr style={{ borderBottom: "2px solid #d3d1c7" }}>
+          <th style={{ textAlign: "left", padding: "6px 8px", color: "#5f5e5a", fontWeight: 500 }}>Year</th>
+          <th style={{ textAlign: "center", padding: "6px 8px", color: "#5f5e5a", fontWeight: 500 }}>Games</th>
+          <th style={{ textAlign: "center", padding: "6px 8px", color: "#5f5e5a", fontWeight: 500 }}>Avg</th>
+          <th style={{ textAlign: "center", padding: "6px 8px", color: "#5f5e5a", fontWeight: 500 }}>High</th>
+          <th style={{ textAlign: "center", padding: "6px 8px", color: "#5f5e5a", fontWeight: 500 }}>Low</th>
+          <th style={{ textAlign: "center", padding: "6px 8px", color: "#5f5e5a", fontWeight: 500 }}>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {[...history].reverse().map((season, i) => (
+          <tr
+            key={season.year}
+            style={{
+              background: i % 2 === 0 ? "#fafaf8" : "white",
+              borderBottom: "1px solid #f1efe8"
+            }}
+          >
+            <td style={{ padding: "8px 8px", fontWeight: season.year === 2026 ? 600 : 400 }}>
+              {season.year}
+              {season.year === 2026 && (
+                <span style={{
+                  marginLeft: 6, fontSize: 10, background: "#1D9E75",
+                  color: "white", borderRadius: 4, padding: "1px 5px"
+                }}>
+                  LIVE
+                </span>
+              )}
+            </td>
+            <td style={{ textAlign: "center", padding: "8px 8px" }}>{season.games_played}</td>
+            <td style={{ textAlign: "center", padding: "8px 8px", fontWeight: 500 }}>{season.avg}</td>
+            <td style={{ textAlign: "center", padding: "8px 8px", color: "#1D9E75" }}>{season.high}</td>
+            <td style={{ textAlign: "center", padding: "8px 8px", color: "#D85A30" }}>{season.low}</td>
+            <td style={{ textAlign: "center", padding: "8px 8px", color: "#888780" }}>{season.total}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
 export default function App() {
   const [players, setPlayers] = useState([]);
+  const [history, setHistory] = useState({});
   const [search, setSearch] = useState("");
   const [posFilter, setPosFilter] = useState("ALL");
   const [loading, setLoading] = useState(true);
-  const [selectedPlayer, setSelectedPlayer] = useState(null)
+  const [selectedPlayer, setSelectedPlayer] = useState(null);
 
   useEffect(() => {
     fetch("/projections.json")
@@ -117,6 +158,11 @@ export default function App() {
         setLoading(false);
       })
       .catch(() => setLoading(false));
+
+    fetch("/player_history.json")
+      .then(res => res.json())
+      .then(data => setHistory(data))
+      .catch(() => {});
   }, []);
 
   const positions = ["ALL", "DEF", "MID", "RUC", "FWD"];
@@ -126,8 +172,6 @@ export default function App() {
     const matchPos = posFilter === "ALL" || p.position?.includes(posFilter);
     return matchSearch && matchPos;
   });
-
-  const top10 = filtered.slice(0, 10);
 
   return (
     <div style={{ maxWidth: 900, margin: "0 auto", padding: "32px 16px", fontFamily: "'Open Sans', sans-serif" }}>
@@ -173,84 +217,79 @@ export default function App() {
         ))
       )}
 
-  {/* Modal */}
-     {selectedPlayer && (
-  <div
-    onClick={() => setSelectedPlayer(null)}
-    style={{
-      position: "fixed",
-      top: 0,
-      left: 0,
-      width: "100%",
-      height: "100%",
-      background: "rgba(0,0,0,0.5)",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      zIndex: 1000
-    }}
-  >
-    <div
-      onClick={(e) => e.stopPropagation()}
-      style={{
-        background: "white",
-        padding: 24,
-        borderRadius: 12,
-        width: "90%",
-        maxWidth: 500
-      }}
-    >
-      <button
-        onClick={() => setSelectedPlayer(null)}
-        style={{
-          float: "right",
-          border: "none",
-          background: "transparent",
-          cursor: "pointer",
-          fontSize: 16
-        }}
-      >
-        ✕
-      </button>
+      {/* Modal */}
+      {selectedPlayer && (
+        <div
+          onClick={() => setSelectedPlayer(null)}
+          style={{
+            position: "fixed", top: 0, left: 0,
+            width: "100%", height: "100%",
+            background: "rgba(0,0,0,0.5)",
+            display: "flex", justifyContent: "center", alignItems: "center",
+            zIndex: 1000
+          }}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: "white", padding: 24, borderRadius: 12,
+              width: "90%", maxWidth: 560,
+              maxHeight: "85vh", overflowY: "auto"
+            }}
+          >
+            <button
+              onClick={() => setSelectedPlayer(null)}
+              style={{ float: "right", border: "none", background: "transparent", cursor: "pointer", fontSize: 16 }}
+            >
+              ✕
+            </button>
 
-      <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 16 }}>
+            {/* Header */}
+            <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 16 }}>
+              <img
+                src={`https://fantasy.afl.com.au/media/fantasy/players/${selectedPlayer.id}_100.webp?v=3`}
+                alt={selectedPlayer.full_name}
+                style={{ width: 80, height: 80, objectFit: "contain", borderRadius: "50%" }}
+                onError={e => e.target.style.display = 'none'}
+              />
+              <div>
+                <h2 style={{ margin: 0 }}>{selectedPlayer.full_name}</h2>
+                <div style={{ marginTop: 4, fontSize: 14, color: "#5f5e5a" }}>
+                  {TEAM_MAP[selectedPlayer.team_id]}
+                </div>
+                <div style={{ marginTop: 4 }}>
+                  <PositionBadges position={selectedPlayer.position} />
+                </div>
+              </div>
+              <img
+                src={`/logos/${selectedPlayer.team_id}.svg`}
+                alt=""
+                style={{ width: 48, height: 48, objectFit: "contain", marginLeft: "auto" }}
+              />
+            </div>
 
-  {/* Player Headshot */}
-  <img
-    src={`https://fantasy.afl.com.au/media/fantasy/players/${selectedPlayer.id}_100.webp?v=3`}
-    alt={selectedPlayer.full_name}
-    style={{
-      width: 144,
-      height: 144,
-      objectFit: "contain",
-      borderRadius: "50%"
-    }}
-    onError={e => e.target.style.display = 'none'}
-  />
+            <p style={{ margin: "0 0 16px", fontSize: 13, color: "#5f5e5a" }}>
+              <strong>Price:</strong> ${selectedPlayer.cost?.toLocaleString()}
+            </p>
 
-  {/* Name + Position */}
-  <div>
-    <h2 style={{ margin: 0 }}>{selectedPlayer.full_name}</h2>
-    <div style={{ marginTop: 4, fontSize: 14 }}>
-      {TEAM_MAP[selectedPlayer.team_id]}
-    </div>
-    <div style={{ marginTop: 4 }}>
-      <PositionBadges position={selectedPlayer.position} />
-    </div>
-  </div>
+            {/* Stat badges */}
+            <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
+              <StatBadge label="2026 Avg" value={selectedPlayer.avg_points} />
+              <StatBadge label="Career Avg" value={selectedPlayer.career_avg?.toFixed(1)} />
+              <StatBadge label="Projected" value={selectedPlayer.projected_avg} />
+            </div>
 
-</div>
-      <p><strong>Price:</strong> ${selectedPlayer.cost?.toLocaleString()}</p>
-
-      <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-        <StatBadge label="Current Avg" value={selectedPlayer.avg_points} />
-        <StatBadge label="Career Avg" value={selectedPlayer.career_avg?.toFixed(1)} />
-        <StatBadge label="Projected Avg" value={selectedPlayer.projected_avg} />
-      </div>
-    </div>
-  </div>
-)}
-
+            {/* Career History */}
+            <div style={{ borderTop: "1px solid #d3d1c7", paddingTop: 16 }}>
+              <div style={{ fontWeight: 500, fontSize: 14, marginBottom: 8 }}>Career History</div>
+              <CareerHistoryTable
+                playerId={selectedPlayer.id}
+                history={history[String(selectedPlayer.id)]}
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
