@@ -7,7 +7,7 @@ A tool to project AFL Fantasy scores for the 2026 season, built with Python and 
 - 2026 player projections based on career averages and recent form
 - Player cards with headshots, team logos and position badges
 - Search and filter by position
-- Player modal with full career history (2015 onwards)
+- Player modal with full career history (2014 onwards)
 - Game-by-game breakdown per season with stats and opponent logos
 - Colour-coded averages and games played
 
