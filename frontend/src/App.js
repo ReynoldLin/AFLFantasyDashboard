@@ -218,10 +218,10 @@ function CareerHistoryTable({ history, roundsPerSeason, byeRounds, teamId, round
   const teamByes = yearByes[String(teamId)] || [];
 
   // For 2026 show all rounds, for other years just show played rounds
-  const minRound = Math.min(...rounds.filter(r => r >= 0));
+  const minRound = season.year === 2026 ? 0 : Math.min(...rounds.filter(r => r >= 0));
   const maxRound = season.year === 2026
-    ? Math.max(...Object.keys(roundsInfo).map(Number))
-    : Math.max(...rounds);
+  ? Math.max(...Object.keys(roundsInfo).map(Number))
+  : Math.max(...rounds);
 
   const rows = [];
 
@@ -273,7 +273,7 @@ function CareerHistoryTable({ history, roundsPerSeason, byeRounds, teamId, round
           <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.frees_against}</td>
         </tr>
             );
-          } else if (isBye) {
+          } else if (isBye && season.year === 2026) {
             // Bye round
             rows.push(
               <tr key={r} style={{ borderBottom: "1px solid #f1efe8", background: "#fafaf8", opacity: 0.4 }}>
@@ -314,9 +314,10 @@ function CareerHistoryTable({ history, roundsPerSeason, byeRounds, teamId, round
                 {opponentId && (
                   <img src={`/logos/${opponentId}.svg`} alt="" style={{ width: 24, height: 24, objectFit: "contain" }} />
                 )}
-              </td></tr>
+              </td>
+</tr>
                 );
-              } else {
+              } else if (isCompleted || !isPlaying) {
                 // Team played but player didn't — DNP
                 rows.push(
                   <tr key={r} style={{ borderBottom: "1px solid #f1efe8", background: "#fafaf8", opacity: 0.4 }}>
