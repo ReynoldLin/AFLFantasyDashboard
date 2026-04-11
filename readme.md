@@ -27,6 +27,23 @@ source venv/bin/activate  # Windows: .\venv\Scripts\activate
 pip install -r backend/requirements.txt
 ```
 
+Run the initial data pipeline:
+
+```bash
+python backend/collector.py
+python backend/projector.py
+python backend/generate_json.py
+python backend/fetch_history.py
+```
+
+Start the API server:
+
+```bash
+uvicorn backend.main:app --reload
+```
+
+API runs on http://localhost:8000. Docs available at http://localhost:8000/docs.
+
 ### Frontend
 
 ```bash
@@ -40,6 +57,14 @@ Frontend runs on http://localhost:3000.
 ## Data Sources
 
 - **AFL Fantasy API** — player data, 2026 scores, pricing, status and historical data
+
+## Updating Data
+
+To refresh player data and projections manually:
+
+```bash
+python backend/refresh.py
+```
 
 ## Notes
 
