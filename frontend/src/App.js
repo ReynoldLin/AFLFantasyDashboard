@@ -111,7 +111,7 @@ function PlayerCard({ player, onClick }) {
   );
 }
 
-function CareerHistoryTable({ history, roundsPerSeason }) {
+function CareerHistoryTable({ history, roundsPerSeason, byeRounds, teamId, roundsInfo }) {
   const [expandedYears, setExpandedYears] = useState(new Set());
 
   if (!history || history.length === 0) {
@@ -211,50 +211,131 @@ function CareerHistoryTable({ history, roundsPerSeason }) {
                         </tr>
                       </thead>
                       <tbody>
-                        {season.games?.map((game, gi) => (
-                          <tr key={gi} style={{
-                            borderBottom: "1px solid #f1efe8",
-                            background: gi % 2 === 0 ? "white" : "#fafaf8"
-                          }}>
-                            <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.round}</td>
-                            <td style={{ textAlign: "center", padding: "5px 4px" }}>
-                              <img
-                                src={`/logos/${game.opponent_id}.svg`}
-                                alt=""
-                                style={{ width: 24, height: 24, objectFit: "contain" }}
-                              />
-                            </td>
-                            <td style={{ textAlign: "center", padding: "5px 8px" }}>
-                              <span style={{
-                                background: avgColour(game.score),
-                                color: "black", borderRadius: 4,
-                                padding: "1px 6px", fontWeight: 500,
-                                display: "inline-block", minWidth: 40, textAlign: "center"
-                              }}>
-                                {game.score}
-                              </span>
-                            </td>
-                            <td style={{ textAlign: "center", padding: "5px 8px" }}>
-                              <span style={{
-                                background: togColour(game.time_on_ground),
-                                color: "black", borderRadius: 6, padding: "2px 0px",
-                                display: "inline-block", minWidth: 42, textAlign: "center"
-                              }}>
-                                {game.time_on_ground}%
-                              </span>
-                            </td>
-                            <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.disposals}</td>
-                            <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.kicks}</td>
-                            <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.handballs}</td>
-                            <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.marks}</td>
-                            <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.tackles}</td>
-                            <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.goals}</td>
-                            <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.behinds}</td>
-                            <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.hitouts}</td>
-                            <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.frees_for}</td>
-                            <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.frees_against}</td>
-                          </tr>
-                        ))}
+                        {(() => {
+  const games = season.games || [];
+  const rounds = games.map(g => g.round);
+  const yearByes = byeRounds[String(season.year)] || {};
+  const teamByes = yearByes[String(teamId)] || [];
+
+  // For 2026 show all rounds, for other years just show played rounds
+  const minRound = Math.min(...rounds.filter(r => r >= 0));
+  const maxRound = season.year === 2026
+    ? Math.max(...Object.keys(roundsInfo).map(Number))
+    : Math.max(...rounds);
+
+  const rows = [];
+
+  for (let r = minRound; r <= maxRound; r++) {
+    const game = games.find(g => g.round === r);
+    const roundInfo = roundsInfo[String(r)] || {};
+    const isBye = teamByes.includes(r);
+    const isCompleted = roundInfo.status === "completed";
+    const isPlaying = roundInfo.status === "playing";
+    const isScheduled = roundInfo.status === "scheduled";
+
+    if (game) {
+      // Player played
+      rows.push(
+        <tr key={r} style={{
+          borderBottom: "1px solid #f1efe8",
+          background: rows.length % 2 === 0 ? "white" : "#fafaf8"
+        }}>
+          <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.round}</td>
+          <td style={{ textAlign: "center", padding: "5px 4px" }}>
+            <img src={`/logos/${game.opponent_id}.svg`} alt="" style={{ width: 24, height: 24, objectFit: "contain" }} />
+          </td>
+          <td style={{ textAlign: "center", padding: "5px 8px" }}>
+            <span style={{
+              background: avgColour(game.score), color: "black", borderRadius: 4,
+              padding: "1px 6px", fontWeight: 500,
+              display: "inline-block", minWidth: 40, textAlign: "center"
+            }}>
+              {game.score}
+            </span>
+          </td>
+          <td style={{ textAlign: "center", padding: "5px 8px" }}>
+            <span style={{
+              background: togColour(game.time_on_ground), color: "black", borderRadius: 6,
+              padding: "2px 0px", display: "inline-block", minWidth: 42, textAlign: "center"
+            }}>
+              {game.time_on_ground}%
+            </span>
+          </td>
+          <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.disposals}</td>
+          <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.kicks}</td>
+          <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.handballs}</td>
+          <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.marks}</td>
+          <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.tackles}</td>
+          <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.goals}</td>
+          <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.behinds}</td>
+          <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.hitouts}</td>
+          <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.frees_for}</td>
+          <td style={{ textAlign: "center", padding: "5px 8px" }}>{game.frees_against}</td>
+        </tr>
+            );
+          } else if (isBye) {
+            // Bye round
+            rows.push(
+              <tr key={r} style={{ borderBottom: "1px solid #f1efe8", background: "#fafaf8", opacity: 0.4 }}>
+                <td style={{ textAlign: "center", padding: "5px 8px" }}>{r}</td>
+                <td colSpan={13} style={{ textAlign: "center", padding: "5px 8px" }}>
+                  <span style={{
+                    fontSize: 11, color: "#1A4E42", background: "#7FD3BF",
+                    borderRadius: 4, padding: "1px 8px", display: "inline-block"
+                  }}>
+                    BYE
+                  </span>
+                </td>
+              </tr>
+            );
+          } else if (isScheduled && season.year === 2026) {
+            const fixture = roundInfo.fixture || {};
+            const opponentId = fixture[String(teamId)];
+            // Upcoming game — blank row
+            rows.push(
+              <tr key={r} style={{ borderBottom: "1px solid #f1efe8", background: "#fafaf8", opacity: 0.4 }}>
+                <td style={{ textAlign: "center", padding: "5px 8px" }}>{r}</td>
+                <td style={{ textAlign: "center", padding: "5px 4px" }}>
+                {opponentId && (
+                  <img src={`/logos/${opponentId}.svg`} alt="" style={{ width: 24, height: 24, objectFit: "contain" }} />
+                )}
+              </td></tr>
+            );
+          } else if ((isCompleted || isPlaying) && season.year === 2026) {
+              const teamHasPlayed = (roundInfo.teamsPlayed || []).includes(teamId);
+              const fixture = roundInfo.fixture || {};
+              const opponentId = fixture[String(teamId)];
+              if (!teamHasPlayed) {
+                // Team hasn't played yet in this round — show blank
+                rows.push(
+                  <tr key={r} style={{ borderBottom: "1px solid #f1efe8", background: "#fafaf8", opacity: 0.4 }}>
+                <td style={{ textAlign: "center", padding: "5px 8px" }}>{r}</td>
+                <td style={{ textAlign: "center", padding: "5px 4px" }}>
+                {opponentId && (
+                  <img src={`/logos/${opponentId}.svg`} alt="" style={{ width: 24, height: 24, objectFit: "contain" }} />
+                )}
+              </td></tr>
+                );
+              } else {
+                // Team played but player didn't — DNP
+                rows.push(
+                  <tr key={r} style={{ borderBottom: "1px solid #f1efe8", background: "#fafaf8", opacity: 0.4 }}>
+                    <td style={{ textAlign: "center", padding: "5px 8px" }}>{r}</td>
+                    <td colSpan={13} style={{ textAlign: "center", padding: "5px 8px" }}>
+                      <span style={{
+                        fontSize: 11, color: "#D85A30", background: "#fde8e8",
+                        borderRadius: 4, padding: "1px 8px", display: "inline-block"
+                      }}>
+                        DNP
+                      </span>
+                    </td>
+                  </tr>
+                );
+              }
+            } 
+        }
+        return rows;
+      })()}
                       </tbody>
                     </table>
                   </td>
@@ -275,6 +356,8 @@ export default function App() {
   const [posFilter, setPosFilter] = useState("ALL");
   const [loading, setLoading] = useState(true);
   const [selectedPlayer, setSelectedPlayer] = useState(null);
+  const [byeRounds, setByeRounds] = useState({});
+  const [roundsInfo, setRoundsInfo] = useState({});
 
   useEffect(() => {
     fetch("/projections.json")
@@ -289,6 +372,16 @@ export default function App() {
       .then(res => res.json())
       .then(data => setHistory(data))
       .catch(() => {});
+
+    fetch("/bye_rounds_all.json")
+      .then(res => res.json())
+      .then(data => setByeRounds(data))
+      .catch(() => {});
+
+    fetch("/rounds_info.json")
+    .then(res => res.json())
+    .then(data => setRoundsInfo(data))
+    .catch(() => {});
 
   }, []);
 
@@ -412,6 +505,9 @@ export default function App() {
               <CareerHistoryTable
                 playerId={selectedPlayer.id}
                 history={history[String(selectedPlayer.id)]}
+                byeRounds={byeRounds}
+                teamId={selectedPlayer.team_id}
+                roundsInfo={roundsInfo}
               />
             </div>
           </div>
