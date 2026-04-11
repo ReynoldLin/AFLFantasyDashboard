@@ -309,19 +309,24 @@ function CareerHistoryTable({ history, roundsPerSeason, byeRounds, teamId, round
                 // Team hasn't played yet in this round — show blank
                 rows.push(
                   <tr key={r} style={{ borderBottom: "1px solid #f1efe8", background: "#fafaf8", opacity: 0.4 }}>
-                <td style={{ textAlign: "center", padding: "5px 8px" }}>{r}</td>
-                <td style={{ textAlign: "center", padding: "5px 4px" }}>
-                {opponentId && (
-                  <img src={`/logos/${opponentId}.svg`} alt="" style={{ width: 24, height: 24, objectFit: "contain" }} />
-                )}
-              </td>
-</tr>
+                    <td style={{ textAlign: "center", padding: "5px 8px" }}>{r}</td>
+                    <td style={{ textAlign: "center", padding: "5px 4px" }}>
+                    {opponentId && (
+                      <img src={`/logos/${opponentId}.svg`} alt="" style={{ width: 24, height: 24, objectFit: "contain" }} />
+                    )}
+                   </td>
+                  </tr>
                 );
               } else if (isCompleted || !isPlaying) {
                 // Team played but player didn't — DNP
                 rows.push(
                   <tr key={r} style={{ borderBottom: "1px solid #f1efe8", background: "#fafaf8", opacity: 0.4 }}>
                     <td style={{ textAlign: "center", padding: "5px 8px" }}>{r}</td>
+                    <td style={{ textAlign: "center", padding: "5px 4px" }}>
+                      {opponentId && (
+                        <img src={`/logos/${opponentId}.svg`} alt="" style={{ width: 24, height: 24, objectFit: "contain" }} />
+                      )}
+                    </td>
                     <td colSpan={13} style={{ textAlign: "center", padding: "5px 8px" }}>
                       <span style={{
                         fontSize: 11, color: "#D85A30", background: "#fde8e8",
@@ -360,26 +365,25 @@ export default function App() {
   const [byeRounds, setByeRounds] = useState({});
   const [roundsInfo, setRoundsInfo] = useState({});
 
-  useEffect(() => {
-    fetch("/projections.json")
-      .then(res => res.json())
-      .then(data => {
-        setPlayers(data);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+  const API = "http://localhost:8000";
 
-    fetch("/player_history.json")
-      .then(res => res.json())
-      .then(data => setHistory(data))
-      .catch(() => {});
+  useEffect(() => {
+    fetch(`${API}/projections`)
+    .then(res => res.json())
+    .then(data => { setPlayers(data); setLoading(false); })
+    .catch(() => setLoading(false));
+
+    fetch(`${API}/history`)
+    .then(res => res.json())
+    .then(data => setHistory(data))
+    .catch(() => {});
 
     fetch("/bye_rounds_all.json")
       .then(res => res.json())
       .then(data => setByeRounds(data))
       .catch(() => {});
 
-    fetch("/rounds_info.json")
+    fetch(`${API}/rounds`)
     .then(res => res.json())
     .then(data => setRoundsInfo(data))
     .catch(() => {});
